@@ -1,5 +1,8 @@
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
 import type { Invoice, InvoiceItem, Client, Profile } from '@/types/database';
 
 interface ExportOptions {
@@ -285,5 +288,35 @@ export async function exportInvoiceToPDF({
 
   // Save the PDF
   const fileName = `${invoice.invoice_number || 'invoice-draft'}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-  doc.save(fileName);
+  
+  // Check if running on native mobile platform
+  if (Capacitor.isNativePlatform()) {
+    // Convert PDF to base64 for mobile
+    const pdfBase64 = doc.output('datauristring').split(',')[1];
+    
+    try {
+      // Save to device filesystem
+      const result = await Filesystem.writeFile({
+        path: fileName,
+        data: pdfBase64,
+        directory: Directory.Documents,
+      });
+      
+      // Share the file so user can save/open it
+      await Share.share({
+        title: 'Invoice PDF',
+        text: `Invoice ${invoice.invoice_number || 'Draft'}`,
+        url: result.uri,
+        dialogTitle: 'Save or Share Invoice',
+      });
+    } catch (error) {
+      console.error('Error saving PDF on mobile:', error);
+      // Fallback: try opening as data URI
+      const pdfDataUri = doc.output('datauristring');
+      window.open(pdfDataUri, '_blank');
+    }
+  } else {
+    // Standard browser download
+    doc.save(fileName);
+  }
 }
