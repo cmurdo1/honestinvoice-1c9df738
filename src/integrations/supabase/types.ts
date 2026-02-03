@@ -179,6 +179,48 @@ export type Database = {
           },
         ]
       }
+      job_leads: {
+        Row: {
+          budget_range: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string
+          id: string
+          location: string
+          source: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          budget_range?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          location: string
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          budget_range?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -224,6 +266,36 @@ export type Database = {
           subscription_status?: string | null
           tax_rate?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      webhook_logs: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          response: Json | null
+          source: string
+          status: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          response?: Json | null
+          source?: string
+          status?: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          response?: Json | null
+          source?: string
+          status?: string
+          type?: string
         }
         Relationships: []
       }

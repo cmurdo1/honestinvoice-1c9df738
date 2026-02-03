@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
 
       if (payload.type === 'job_lead') {
         // Process job lead - could trigger auto-bid
-        const jobData = payload.data as JobLead;
+        const jobData = payload.data as unknown as JobLead;
         
         // Store the job lead
         const { data: lead, error: leadError } = await supabase
