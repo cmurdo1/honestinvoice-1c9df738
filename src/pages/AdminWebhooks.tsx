@@ -63,20 +63,18 @@ export default function AdminWebhooks() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch webhook logs using rpc to bypass type constraints on new tables
-      const { data: logsData, error: logsError } = await supabase
-        .rpc('get_webhook_logs') as { data: WebhookLog[] | null, error: unknown };
+      // Fetch webhook logs using rpc with type assertion
+      const { data: logsData, error: logsError } = await (supabase.rpc as Function)('get_webhook_logs');
 
       if (!logsError && logsData) {
-        setLogs(logsData);
+        setLogs(logsData as WebhookLog[]);
       }
 
       // Fetch job leads
-      const { data: leadsData, error: leadsError } = await supabase
-        .rpc('get_job_leads') as { data: JobLead[] | null, error: unknown };
+      const { data: leadsData, error: leadsError } = await (supabase.rpc as Function)('get_job_leads');
 
       if (!leadsError && leadsData) {
-        setLeads(leadsData);
+        setLeads(leadsData as JobLead[]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -132,7 +130,7 @@ export default function AdminWebhooks() {
       if (error) throw error;
 
       // Update lead status using rpc
-      await supabase.rpc('update_job_lead_status', { lead_id: lead.id, new_status: 'bid_generated' });
+      await (supabase.rpc as Function)('update_job_lead_status', { lead_id: lead.id, new_status: 'bid_generated' });
 
       toast.success('Bid generated! Check the results.');
       setTestResult(JSON.stringify(data, null, 2));

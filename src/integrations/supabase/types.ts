@@ -304,6 +304,50 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_job_leads: {
+        Args: never
+        Returns: {
+          budget_range: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string
+          id: string
+          location: string
+          source: string
+          status: string
+          title: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "job_leads"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_webhook_logs: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          payload: Json
+          response: Json | null
+          source: string
+          status: string
+          type: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "webhook_logs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      update_job_lead_status: {
+        Args: { lead_id: string; new_status: string }
+        Returns: undefined
+      }
       validate_feedback_token: {
         Args: { p_invoice_id: string; p_token: string }
         Returns: boolean

@@ -20,6 +20,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
+import AdminWebhooks from "./pages/AdminWebhooks";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin-webhooks"
+              element={
+                <ProtectedRoute>
+                  <AdminWebhooks />
                 </ProtectedRoute>
               }
             />
