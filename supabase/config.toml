@@ -1,1 +1,25 @@
 project_id = "hnhprvnheajtfvobjevp"
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
+
+[functions.send-invoice-email]
+verify_jwt = false
+
+[functions.submit-feedback]
+verify_jwt = false
+
+[functions.extract-line-items]
+verify_jwt = false
+
+[functions.admin-webhook]
+verify_jwt = false
