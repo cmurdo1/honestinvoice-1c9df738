@@ -134,14 +134,14 @@ serve(async (req) => {
       0
     ) || total_amount;
 
-    // Build the itemized line items HTML
+    // Build the itemized line items HTML - mobile optimized with stacked layout
     const lineItemsHtml = lineItems && lineItems.length > 0 
       ? lineItems.map((item: InvoiceItem) => `
           <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #eee; color: #333;">${item.description}</td>
-            <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #666;">${item.quantity}</td>
-            <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; color: #666;">$${item.unit_price.toFixed(2)}</td>
-            <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600; color: #333;">$${(item.quantity * item.unit_price).toFixed(2)}</td>
+            <td style="padding: 10px 8px; border-bottom: 1px solid #eee; color: #333; font-size: 14px; word-wrap: break-word; max-width: 150px;">${item.description}</td>
+            <td style="padding: 10px 4px; border-bottom: 1px solid #eee; text-align: center; color: #666; font-size: 13px; white-space: nowrap;">${item.quantity}</td>
+            <td style="padding: 10px 4px; border-bottom: 1px solid #eee; text-align: right; color: #666; font-size: 13px; white-space: nowrap;">$${item.unit_price.toFixed(2)}</td>
+            <td style="padding: 10px 8px; border-bottom: 1px solid #eee; text-align: right; font-weight: 600; color: #333; font-size: 14px; white-space: nowrap;">$${(item.quantity * item.unit_price).toFixed(2)}</td>
           </tr>
         `).join('')
       : '';
@@ -153,46 +153,55 @@ serve(async (req) => {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Invoice ${invoice_number}</title>
+          <style>
+            @media only screen and (max-width: 480px) {
+              .invoice-table th, .invoice-table td { padding: 8px 4px !important; font-size: 12px !important; }
+              .invoice-container { padding: 20px 12px !important; }
+              .invoice-card { padding: 20px !important; }
+              .invoice-header h2 { font-size: 18px !important; }
+              .invoice-header .amount { font-size: 26px !important; }
+            }
+          </style>
         </head>
-        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
-          <div style="max-width: 650px; margin: 0 auto; padding: 40px 20px;">
-            <div style="background-color: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-              <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #228B22; margin: 0; font-size: 28px;">${business_name || 'HonestInvoice'}</h1>
-                <p style="color: #666; margin: 10px 0 0 0;">Professional Invoice</p>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; -webkit-text-size-adjust: 100%;">
+          <div class="invoice-container" style="max-width: 600px; margin: 0 auto; padding: 20px 10px;">
+            <div class="invoice-card" style="background-color: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="color: #228B22; margin: 0; font-size: 24px;">${business_name || 'HonestInvoice'}</h1>
+                <p style="color: #666; margin: 8px 0 0 0; font-size: 14px;">Professional Invoice</p>
               </div>
               
-              <div style="background: linear-gradient(135deg, #228B22 0%, #1e7a1e 100%); color: white; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
-                <h2 style="margin: 0 0 10px 0; font-size: 22px;">Invoice ${invoice_number}</h2>
-                <p style="margin: 0; font-size: 32px; font-weight: bold;">$${total_amount.toFixed(2)}</p>
-                <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Due: ${dueDateText}</p>
+              <div class="invoice-header" style="background: linear-gradient(135deg, #228B22 0%, #1e7a1e 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h2 style="margin: 0 0 8px 0; font-size: 18px;">Invoice ${invoice_number}</h2>
+                <p class="amount" style="margin: 0; font-size: 28px; font-weight: bold;">$${total_amount.toFixed(2)}</p>
+                <p style="margin: 6px 0 0 0; font-size: 13px; opacity: 0.9;">Due: ${dueDateText}</p>
               </div>
               
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
+              <p style="color: #333; font-size: 15px; line-height: 1.5; margin: 0 0 12px 0;">
                 Hello ${client_name || 'there'},
               </p>
               
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                Please find your itemized invoice from <strong>${business_name || 'HonestInvoice'}</strong> below.
+              <p style="color: #333; font-size: 15px; line-height: 1.5; margin: 0 0 16px 0;">
+                Please find your invoice from <strong>${business_name || 'HonestInvoice'}</strong> below.
               </p>
               
               ${job_description ? `
-                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #228B22;">
-                  <strong style="color: #333;">Job Summary:</strong>
-                  <p style="color: #666; margin: 8px 0 0 0;">${job_description}</p>
+                <div style="background-color: #f9f9f9; padding: 12px; border-radius: 8px; margin: 16px 0; border-left: 3px solid #228B22;">
+                  <strong style="color: #333; font-size: 13px;">Job Summary:</strong>
+                  <p style="color: #666; margin: 6px 0 0 0; font-size: 13px;">${job_description}</p>
                 </div>
               ` : ''}
               
               ${lineItems && lineItems.length > 0 ? `
-                <div style="margin: 25px 0;">
-                  <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">Itemized Breakdown</h3>
-                  <table style="width: 100%; border-collapse: collapse; border: 1px solid #eee; border-radius: 8px;">
+                <div style="margin: 20px 0; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                  <h3 style="color: #333; margin: 0 0 12px 0; font-size: 16px;">Itemized Breakdown</h3>
+                  <table class="invoice-table" style="width: 100%; border-collapse: collapse; border: 1px solid #eee; font-size: 13px; table-layout: fixed;">
                     <thead>
                       <tr style="background-color: #f9f9f9;">
-                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #228B22;">Description</th>
-                        <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #228B22;">Qty</th>
-                        <th style="padding: 12px; text-align: right; font-weight: 600; color: #333; border-bottom: 2px solid #228B22;">Price</th>
-                        <th style="padding: 12px; text-align: right; font-weight: 600; color: #333; border-bottom: 2px solid #228B22;">Total</th>
+                        <th style="padding: 10px 8px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #228B22; width: 45%;">Item</th>
+                        <th style="padding: 10px 4px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #228B22; width: 12%;">Qty</th>
+                        <th style="padding: 10px 4px; text-align: right; font-weight: 600; color: #333; border-bottom: 2px solid #228B22; width: 20%;">Rate</th>
+                        <th style="padding: 10px 8px; text-align: right; font-weight: 600; color: #333; border-bottom: 2px solid #228B22; width: 23%;">Total</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -200,18 +209,18 @@ serve(async (req) => {
                     </tbody>
                     <tfoot>
                       <tr style="background-color: #f9f9f9;">
-                        <td colspan="3" style="padding: 12px; text-align: right; font-weight: 600; color: #333;">Subtotal:</td>
-                        <td style="padding: 12px; text-align: right; font-weight: 600; color: #333;">$${subtotal.toFixed(2)}</td>
+                        <td colspan="3" style="padding: 10px 8px; text-align: right; font-weight: 600; color: #333; font-size: 13px;">Subtotal:</td>
+                        <td style="padding: 10px 8px; text-align: right; font-weight: 600; color: #333; font-size: 13px;">$${subtotal.toFixed(2)}</td>
                       </tr>
                       ${total_amount !== subtotal ? `
                         <tr style="background-color: #f9f9f9;">
-                          <td colspan="3" style="padding: 12px; text-align: right; font-weight: 600; color: #666;">Tax:</td>
-                          <td style="padding: 12px; text-align: right; font-weight: 600; color: #666;">$${(total_amount - subtotal).toFixed(2)}</td>
+                          <td colspan="3" style="padding: 10px 8px; text-align: right; font-weight: 600; color: #666; font-size: 13px;">Tax:</td>
+                          <td style="padding: 10px 8px; text-align: right; font-weight: 600; color: #666; font-size: 13px;">$${(total_amount - subtotal).toFixed(2)}</td>
                         </tr>
                       ` : ''}
                       <tr style="background-color: #228B22;">
-                        <td colspan="3" style="padding: 15px; text-align: right; font-weight: 700; color: white; font-size: 16px;">Total Due:</td>
-                        <td style="padding: 15px; text-align: right; font-weight: 700; color: white; font-size: 18px;">$${total_amount.toFixed(2)}</td>
+                        <td colspan="3" style="padding: 12px 8px; text-align: right; font-weight: 700; color: white; font-size: 14px;">Total Due:</td>
+                        <td style="padding: 12px 8px; text-align: right; font-weight: 700; color: white; font-size: 15px;">$${total_amount.toFixed(2)}</td>
                       </tr>
                     </tfoot>
                   </table>
