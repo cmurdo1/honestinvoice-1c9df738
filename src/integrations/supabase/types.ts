@@ -269,6 +269,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       webhook_logs: {
         Row: {
           created_at: string
@@ -304,6 +325,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_admin_access: { Args: never; Returns: boolean }
       get_job_leads: {
         Args: never
         Returns: {
@@ -344,6 +366,13 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       update_job_lead_status: {
         Args: { lead_id: string; new_status: string }
         Returns: undefined
@@ -354,6 +383,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       invoice_status: "draft" | "sent" | "paid" | "overdue"
     }
     CompositeTypes: {
@@ -482,6 +512,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       invoice_status: ["draft", "sent", "paid", "overdue"],
     },
   },
