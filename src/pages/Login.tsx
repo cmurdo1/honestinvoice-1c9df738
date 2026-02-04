@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,21 @@ import { Loader2 } from 'lucide-react';
 import logo from '@/assets/honest-invoice-logo-dark.png';
 import { lovable } from '@/integrations/lovable/index';
 import { Separator } from '@/components/ui/separator';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const {
-    signIn
-  } = useAuth();
+  const { signIn, user, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -37,13 +43,13 @@ export default function Login() {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     const {
       error
     } = await signIn(email, password);
     if (error) {
       toast.error(error.message);
-      setLoading(false);
+      setSubmitting(false);
     } else {
       toast.success('Welcome back!');
       navigate('/dashboard');
@@ -70,8 +76,8 @@ export default function Login() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={loading || googleLoading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={submitting || googleLoading}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
             
@@ -86,7 +92,7 @@ export default function Login() {
               variant="outline" 
               className="w-full" 
               onClick={handleGoogleSignIn}
-              disabled={loading || googleLoading}
+              disabled={submitting || googleLoading}
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

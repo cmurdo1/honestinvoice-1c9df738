@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -15,10 +15,17 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, user, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -49,13 +56,13 @@ export default function Signup() {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
 
     const { error } = await signUp(email, password);
 
     if (error) {
       toast.error(error.message);
-      setLoading(false);
+      setSubmitting(false);
     } else {
       toast.success('Account created successfully!');
       navigate('/dashboard');
@@ -112,8 +119,8 @@ export default function Signup() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={loading || googleLoading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={submitting || googleLoading}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
             
@@ -128,7 +135,7 @@ export default function Signup() {
               variant="outline" 
               className="w-full" 
               onClick={handleGoogleSignIn}
-              disabled={loading || googleLoading}
+              disabled={submitting || googleLoading}
             >
               {googleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
