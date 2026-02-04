@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminStatus } from '@/hooks/useAdminStatus';
 import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, 
@@ -9,7 +10,8 @@ import {
   Menu,
   X,
   Users,
-  Crown
+  Crown,
+  Shield
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -26,15 +28,9 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/create', label: 'Magic Create', icon: Wand2 },
-  { href: '/clients', label: 'Clients', icon: Users },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
-
 export function AppLayout({ children }: AppLayoutProps) {
   const { signOut, subscription } = useAuth();
+  const { isAdmin } = useAdminStatus();
   const { resolvedTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,6 +38,15 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const isPro = subscription.subscribed;
   const logo = resolvedTheme === 'dark' ? logoDark : logoLight;
+
+  // Build nav items dynamically based on admin status
+  const allNavItems = [
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/create', label: 'Magic Create', icon: Wand2 },
+    { href: '/clients', label: 'Clients', icon: Users },
+    { href: '/settings', label: 'Settings', icon: Settings },
+    ...(isAdmin ? [{ href: '/ops-panel', label: 'Ops Panel', icon: Shield }] : []),
+  ];
 
   const handleSignOut = async () => {
     await signOut();
@@ -74,7 +79,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4">
-            {navItems.map((item) => {
+            {allNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
               return (
@@ -146,7 +151,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <OfflineIndicator />
             </div>
             <nav className="flex-1 space-y-1 p-4">
-              {navItems.map((item) => {
+              {allNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
                 return (
