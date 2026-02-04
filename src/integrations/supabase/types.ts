@@ -322,7 +322,51 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_safe: {
+        Row: {
+          address: string | null
+          brand_color: string | null
+          business_name: string | null
+          created_at: string | null
+          email: string | null
+          id: string | null
+          logo_url: string | null
+          phone: string | null
+          subscription_end: string | null
+          subscription_status: string | null
+          tax_rate: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          brand_color?: string | null
+          business_name?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          subscription_end?: string | null
+          subscription_status?: string | null
+          tax_rate?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          brand_color?: string | null
+          business_name?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          subscription_end?: string | null
+          subscription_status?: string | null
+          tax_rate?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_admin_access: { Args: never; Returns: boolean }
