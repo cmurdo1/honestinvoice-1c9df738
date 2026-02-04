@@ -370,6 +370,31 @@ export type Database = {
     }
     Functions: {
       check_admin_access: { Args: never; Returns: boolean }
+      get_all_feedback: {
+        Args: never
+        Returns: {
+          client_name: string
+          comment: string
+          created_at: string
+          id: string
+          invoice_id: string
+          invoice_number: string
+          rating: number
+          user_email: string
+        }[]
+      }
+      get_all_users: {
+        Args: never
+        Returns: {
+          business_name: string
+          created_at: string
+          email: string
+          id: string
+          invoice_count: number
+          subscription_end: string
+          subscription_status: string
+        }[]
+      }
       get_job_leads: {
         Args: never
         Returns: {
@@ -391,6 +416,25 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_subscription_stats: {
+        Args: never
+        Returns: {
+          count: number
+          status: string
+        }[]
+      }
+      get_system_stats: {
+        Args: never
+        Returns: {
+          active_subscriptions: number
+          invoices_this_month: number
+          total_clients: number
+          total_invoices: number
+          total_revenue: number
+          total_users: number
+          users_this_month: number
+        }[]
       }
       get_webhook_logs: {
         Args: never
