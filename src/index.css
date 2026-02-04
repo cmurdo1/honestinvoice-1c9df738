@@ -124,10 +124,58 @@
   background: linear-gradient(135deg, hsl(220 25% 6%) 0%, hsl(220 25% 8%) 40%, hsl(142 72% 15% / 0.4) 100%);
 }
 
-/* Mobile-friendly touch targets */
-@media (max-width: 768px) {
+/* Mobile-friendly touch targets and safe areas */
+@layer utilities {
   .touch-target {
-    min-height: 44px;
-    min-width: 44px;
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Sticky headers for mobile lists */
+.sticky-header {
+  position: sticky;
+  top: 3.5rem; /* Account for mobile header */
+  z-index: 10;
+  background: hsl(var(--background) / 0.95);
+  backdrop-filter: blur(8px);
+}
+
+@media (min-width: 1024px) {
+  .sticky-header {
+    top: 0;
+  }
+}
+
+/* Pull to refresh indicator */
+.pull-indicator {
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+/* Swipe action backgrounds */
+.swipe-delete {
+  background: linear-gradient(90deg, transparent 0%, hsl(var(--destructive)) 100%);
+}
+
+.swipe-archive {
+  background: linear-gradient(-90deg, transparent 0%, hsl(var(--primary)) 100%);
+}
+
+/* Improved button touch feedback */
+@media (hover: none) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  button:active, a:active, [role="button"]:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
   }
 }
