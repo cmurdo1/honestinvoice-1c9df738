@@ -22,7 +22,7 @@ interface JobLead {
   source: string;
 }
 
-// Simple secret for webhook authentication
+// Secret for webhook authentication from automated systems
 const WEBHOOK_SECRET = Deno.env.get('WEBHOOK_SECRET') || 'change-this-secret';
 
 Deno.serve(async (req) => {
@@ -33,29 +33,44 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // Verify webhook secret for automated requests
+    // Verify authentication
     const webhookSecret = req.headers.get('x-webhook-secret');
     const authHeader = req.headers.get('authorization');
     
     let isAuthenticated = false;
     let userId: string | null = null;
 
-    // Check webhook secret first (for automated systems)
+    // Check webhook secret first (for automated systems like Thumbtack, etc.)
     if (webhookSecret === WEBHOOK_SECRET) {
       isAuthenticated = true;
     }
-    // Then check JWT (for admin UI access)
+    // Then check JWT with server-side admin role verification
     else if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.replace('Bearer ', '');
-      const { data: { user }, error } = await supabase.auth.getUser(token);
       
-      if (!error && user) {
-        // You can add admin check here if needed
-        // For now, any authenticated user with valid token can access
-        isAuthenticated = true;
-        userId = user.id;
+      // Create client with user's token to verify and get claims
+      const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      
+      const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getUser(token);
+      
+      if (!claimsError && claimsData?.user) {
+        userId = claimsData.user.id;
+        
+        // Server-side admin check using service role client
+        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+        
+        const { data: hasRole, error: roleError } = await supabaseAdmin.rpc('has_role', {
+          _user_id: userId,
+          _role: 'admin'
+        });
+        
+        if (!roleError && hasRole === true) {
+          isAuthenticated = true;
+        }
       }
     }
 
@@ -66,9 +81,12 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Use service role for data operations
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     // Handle different HTTP methods
     if (req.method === 'GET') {
-      // Return recent webhook logs (for admin UI)
+      // Return recent webhook logs (for ops panel UI)
       const { data: logs, error } = await supabase
         .from('webhook_logs')
         .select('*')
@@ -112,7 +130,7 @@ Deno.serve(async (req) => {
       let response: Record<string, unknown> = { received: true };
 
       if (payload.type === 'job_lead') {
-        // Process job lead - could trigger auto-bid
+        // Process job lead
         const jobData = payload.data as unknown as JobLead;
         
         // Store the job lead
@@ -136,9 +154,6 @@ Deno.serve(async (req) => {
           response = { ...response, lead_stored: false, error: leadError.message };
         } else {
           response = { ...response, lead_stored: true, lead_id: lead?.id };
-          
-          // Optionally trigger auto-bid logic here
-          // This would call the extract-line-items function to generate a quote
         }
       }
 

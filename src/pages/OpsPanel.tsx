@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { RefreshCw, Send, Webhook, Settings2, Brain, Shield } from 'lucide-react';
+import { RefreshCw, Send, Webhook, Settings2, Brain, Shield, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface WebhookLog {
@@ -37,41 +37,66 @@ interface JobLead {
   created_at: string;
 }
 
-// Your admin email - change this to your actual email
-const ADMIN_EMAIL = 'admin@honestinvoice.app';
-
-export default function AdminWebhooks() {
+export default function OpsPanel() {
   const { user, session } = useAuth();
   const [logs, setLogs] = useState<WebhookLog[]>([]);
   const [leads, setLeads] = useState<JobLead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkingAccess, setCheckingAccess] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
   const [aiProvider, setAiProvider] = useState<'lovable' | 'openrouter'>('lovable');
   const [aiModel, setAiModel] = useState('');
   const [testJobDescription, setTestJobDescription] = useState('');
   const [testResult, setTestResult] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
 
-  // Simple admin check - you can customize this
-  const isAdmin = user?.email === ADMIN_EMAIL || user?.email?.endsWith('@honestinvoice.app');
+  // Server-side admin check using SECURITY DEFINER function
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!session?.access_token) {
+        setCheckingAccess(false);
+        setHasAccess(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('check_admin_access');
+        
+        if (error) {
+          console.error('Access check error:', error);
+          setHasAccess(false);
+        } else {
+          setHasAccess(data === true);
+        }
+      } catch (err) {
+        console.error('Access check failed:', err);
+        setHasAccess(false);
+      } finally {
+        setCheckingAccess(false);
+      }
+    };
+
+    checkAccess();
+  }, [session?.access_token]);
 
   useEffect(() => {
-    if (isAdmin && session?.access_token) {
+    if (hasAccess && session?.access_token) {
       fetchData();
     }
-  }, [isAdmin, session?.access_token]);
+  }, [hasAccess, session?.access_token]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch webhook logs using rpc with type assertion
-      const { data: logsData, error: logsError } = await (supabase.rpc as Function)('get_webhook_logs');
+      // Fetch webhook logs using rpc
+      const { data: logsData, error: logsError } = await supabase.rpc('get_webhook_logs');
 
       if (!logsError && logsData) {
         setLogs(logsData as WebhookLog[]);
       }
 
       // Fetch job leads
-      const { data: leadsData, error: leadsError } = await (supabase.rpc as Function)('get_job_leads');
+      const { data: leadsData, error: leadsError } = await supabase.rpc('get_job_leads');
 
       if (!leadsError && leadsData) {
         setLeads(leadsData as JobLead[]);
@@ -130,7 +155,7 @@ export default function AdminWebhooks() {
       if (error) throw error;
 
       // Update lead status using rpc
-      await (supabase.rpc as Function)('update_job_lead_status', { lead_id: lead.id, new_status: 'bid_generated' });
+      await supabase.rpc('update_job_lead_status', { lead_id: lead.id, new_status: 'bid_generated' });
 
       toast.success('Bid generated! Check the results.');
       setTestResult(JSON.stringify(data, null, 2));
@@ -141,12 +166,24 @@ export default function AdminWebhooks() {
     }
   };
 
-  // Redirect non-admins
+  // Redirect if not logged in
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!isAdmin) {
+  // Show loading while checking access
+  if (checkingAccess) {
+    return (
+      <AppLayout>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Redirect if no access (silently redirect to dashboard)
+  if (!hasAccess) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -157,7 +194,7 @@ export default function AdminWebhooks() {
           <div className="flex items-center gap-3">
             <Shield className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+              <h1 className="text-2xl font-bold">Operations Panel</h1>
               <p className="text-muted-foreground">Webhook management & AI configuration</p>
             </div>
           </div>
@@ -242,7 +279,7 @@ export default function AdminWebhooks() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-3 bg-muted rounded-lg font-mono text-sm break-all">
-              POST {import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-webhook
+              POST {import.meta.env.VITE_SUPABASE_URL}/functions/v1/ops-webhook
             </div>
             <div className="text-sm text-muted-foreground">
               <p className="font-medium mb-2">Required Headers:</p>
