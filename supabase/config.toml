@@ -21,5 +21,5 @@ verify_jwt = false
 [functions.extract-line-items]
 verify_jwt = false
 
-[functions.admin-webhook]
+[functions.ops-webhook]
 verify_jwt = false

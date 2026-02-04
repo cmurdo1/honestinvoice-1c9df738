@@ -20,7 +20,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
-import AdminWebhooks from "./pages/AdminWebhooks";
+import OpsPanel from "./pages/OpsPanel";
 
 const queryClient = new QueryClient();
 
@@ -83,10 +83,10 @@ const App = () => (
               }
             />
             <Route
-              path="/admin-webhooks"
+              path="/ops-panel"
               element={
                 <ProtectedRoute>
-                  <AdminWebhooks />
+                  <OpsPanel />
                 </ProtectedRoute>
               }
             />
