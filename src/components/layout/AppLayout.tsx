@@ -164,7 +164,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       {/* Main Content */}
       <main className="pt-16 lg:ml-64 lg:pt-0">
-        <div className="min-h-screen p-4 lg:p-8">{children}</div>
+        <div className="min-h-screen app-gradient p-4 lg:p-8">{children}</div>
       </main>
     </div>
   );
